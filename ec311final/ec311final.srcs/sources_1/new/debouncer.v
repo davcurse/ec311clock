@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 
 module debouncer (
-  input wire clk_i,
-  input wire resetn_btn_i,
-  input wire increment_counter_btn_i,
-  output reg button_out,
-  output reg [19:0] deb_count
+    input wire clk_i,
+    input wire resetn_btn_i,
+    input wire increment_counter_btn_i,
+    output reg button_out,
+    output reg [19:0] deb_count
 );
 
     reg deb_count_start;
