@@ -44,7 +44,7 @@ wire khz_clock;
 // Instantiate that jit
 clock_divider clock1(.clock(clk), .reset(reset), .khz_out(khz_clock));
 
-always @ (posedge clk or negedge reset) begin
+    always @ (posedge khz_clk or negedge reset) begin
     if(!reset) begin
         hour24 <= 0;
         hour12 <= 0;
