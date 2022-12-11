@@ -29,31 +29,30 @@ module timer(
     input left,
     input right,
     output reg [28:0] mytime,
-//    output reg [3:0] editing,
-    output reg [6:0] hours,
-    output reg [5:0] minutes, seconds,
-    output reg [9:0] milliseconds
+    output reg [1:0] editing
+//    output reg [6:0] hours,
+//    output reg [5:0] minutes, seconds,
+//    output reg [9:0] milliseconds
     );
-//    reg [3:0] editing;
-//    reg [6:0] hours;
-//    reg [5:0] minutes, seconds;
-//    reg [9:0] milliseconds;
+    reg [6:0] hours;
+    reg [5:0] minutes, seconds;
+    reg [9:0] milliseconds;
     wire kiHz;
     clock_divider kHz(clk, reset, kiHz);
+    edit editor(clk, up, down, left, right, {hours, minutes, seconds, milliseconds}, {hours, minutes, seconds, milliseconds}, editing);
     always @ (posedge clk or negedge reset) begin
         if (!reset) begin
             mytime <= 0;
-            hours <= 01;
-            minutes <= 01;
-            seconds <= 01;
-            milliseconds <= 01;
-//            editing <= 0;
+            hours <= 0;
+            minutes <= 0;
+            seconds <= 0;
+            milliseconds <= 0;
         end else begin
             mytime <= {hours, minutes, seconds, milliseconds};
             end
     end
-//    always @ (posedge kiHz) begin
-    always @ (posedge clk) begin
+    always @ (posedge kiHz) begin
+//    always @ (posedge clk) begin
        if (!edit && {hours, minutes, seconds, milliseconds} != 0) begin
             milliseconds <= milliseconds - 1;
             if (milliseconds == 0) begin
