@@ -49,6 +49,8 @@ module top(
     reg [28:0] out_twentyfour;
     reg [28:0] out_timer;
     reg [28:0] out_stopwatch;
+    reg [28:0] myTime;
+    reg [62:0] SEGMENTS;
     clock_divider kHZ(CLK, RST_BTN, kHz_out);
     debouncer UPdb(CLK, RST_BTN, UP, UP_db);
     debouncer DOWNdb(CLK, RST_BTN, DOWN, DOWN_db);
@@ -61,7 +63,16 @@ module top(
         stopwatch_RST = (SELECT == 2'b11) ? RST_BTN : 1'b1;
     end
     internal_clock internal(CLK, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, internal_RST, out_twelve, out_twentyfour);
-    timer timer(CLK, timer_RST, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db);
+    timer timer(CLK, timer_RST, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, out_timer, );
     stopwatch stopwatch(CLK, stopwatch_RST, TOGGLE_db, out_stopwatch);
+    always @ (*) begin
+        case (SELECT)
+            2'b00: myTime = out_twelve;
+            2'b01: myTime = out_twentyfour;
+            2'b10: myTime = out_timer;
+            2'b11: myTime = out_stopwatch;
+        endcase
+    end
+    splice port(myTime, SEGMENTS);
     VGA_display display(CLK, RST_BTN, SEGMENTS, VGA_HS_O, VGA_VS_O, VGA_R, VGA_G, VGA_B);
 endmodule
