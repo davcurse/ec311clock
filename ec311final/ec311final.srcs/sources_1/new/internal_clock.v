@@ -27,24 +27,28 @@
 // outputs 12 and 24 hour clock times
 // output am and pm
 
-module internal_clock(clk, edit_sw, reset, clock12, clock24, millisecond, minute, second, hour12, hour24);
+module internal_clock(clk, edit_sw, reset, up, down, left, right, clock12, clock24, editing);
 
-input clk, edit_sw, reset;
+input clk, edit_sw, reset, up, down, left, right;
 output reg [28:0] clock12, clock24;
+output reg [1:0] editing;
 
-output reg[9:0] millisecond;
-output reg [5:0] minute, second;
-output reg [6:0] hour12, hour24; 
+reg [9:0] millisecond;
+reg [5:0] minute, second;
+reg [6:0] hour12, hour24; 
 
 //reg[9:0] millisecond;
 //reg [5:0] minute, second;
 //reg [4:0] hour12, hour24; // this is the bit size for the 24 hour clock cuz 32
 wire khz_clock;
 
+// Instantiate the edit jit
+edit edit1(.clk(clk), .en(edit_sw), .up(up), .down(down), .left(left), .left(left), .right(right), .time_in({hour24, minute, second, millisecond}), .time_out({hour24, minute, second, millisecond}), .editing(editing));
+
 // Instantiate that jit
 clock_divider clock1(.clock(clk), .reset(reset), .khz_out(khz_clock));
 
-    always @ (posedge khz_clk or negedge reset) begin
+always @ (posedge khz_clock or negedge reset) begin
     if(!reset) begin
         hour24 <= 0;
         hour12 <= 0;
@@ -68,17 +72,12 @@ clock_divider clock1(.clock(clk), .reset(reset), .khz_out(khz_clock));
                     
                     if(hour24 == 5'b11000) begin // This is for the 24 hour clock
                         hour24 <= 5'b00000;
-            //            minute = 6'b000000;
-            //            second = 6'b000000;
-            //            millisecond = 10'b0000000000;
                     end
-                    
-                    if(hour12 == 5'b01100) begin // This is for the 12 hour clock
-                        hour12 <= 5'b00000;
-            //            minute = 6'b000000;
-            //            second = 6'b000000;
-            //            millisecond = 10'b0000000000;
-                    end        
+                    if(hour24 % 12 == 0) begin // This is for the 12 hour clock when 24 hour clock is at 12
+                        hour12 <= (hour24 % 12) + 5'b01100;
+                    end else begin
+                        hour12 <= hour24 % 12;
+                    end
                 end
             end
         end
