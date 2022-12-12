@@ -19,23 +19,24 @@ module stopwatch(
     reg [5:0] seconds;
     reg [9:0] ms;
     clock_divider cd(clk, resetn, khz_clock);
-    
-    always @ (posedge clk or negedge resetn) begin
+    always @ (posedge clk) begin
+        if (!resetn) begin
+            mode <= 0;
+        end else begin
+            if (toggle) begin
+                mode <= ~mode;
+            end
+        end
+    end
+    always @ (posedge khz_clock or negedge resetn) begin
         if (!resetn) begin
             num <= 0;
-            mode <= 0;
             hours <= 0;
             minutes <= 0;
             seconds <= 0;
             ms <= 0;
         end else begin
-            num <= {hours,minutes,seconds,ms};
-            if (toggle)
-                mode <= ~mode;
-        end
-    end //always
-    
-    always @ (posedge khz_clock) begin
+        num <= {hours,minutes,seconds,ms};
         if (mode) begin
             ms <= ms + 1;
             if (ms == 999) begin
@@ -48,7 +49,6 @@ module stopwatch(
                         minutes <= 0;
                         hours <= hours + 1;
                         if (hours == 99) begin
-                            mode <= 0;
                             hours <= 0;
                             minutes <= 0;
                             seconds <= 0;
@@ -57,6 +57,7 @@ module stopwatch(
                     end
                 end
             end
+        end
         end
     end //always
                

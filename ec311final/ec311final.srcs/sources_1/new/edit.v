@@ -27,6 +27,7 @@ module edit(
     input down,
     input left,
     input right,
+    input [6:0] limit,
     input [28:0] time_in,
     output reg [28:0] time_out,
     output reg [1:0] editing
@@ -46,7 +47,7 @@ module edit(
                 case (editing)
                     2'b00: begin
                         time_out[28:22] <= time_out[28:22] + 1;
-                        if (time_out[28:22] == 99) begin
+                        if (time_out[28:22] == limit) begin
                             time_out[28:22] <= 0;
                         end
                     end
@@ -69,7 +70,7 @@ module edit(
                     2'b00: begin
                         time_out[28:22] <= time_out[28:22] - 1;
                         if (time_out[28:22] == 0) begin
-                            time_out[28:22] <= 99;
+                            time_out[28:22] <= limit;
                         end
                     end
                     2'b01: begin

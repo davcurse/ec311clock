@@ -42,41 +42,36 @@ module timer(
     wire [9:0] EDITmillisecond;
     wire [5:0] EDITminute, EDITsecond;
     wire [6:0] EDIThours;
-    
+    wire [6:0] limit;
+    assign limit = 99;
     clock_divider kHz(clk, reset, kiHz);
-    edit editor(clk, edit, up, down, left, right, {hours, minutes, seconds, milliseconds}, {EDIThours, EDITminute, EDITsecond, EDITmillisecond}, editing);
-    always @ (posedge clk or negedge reset) begin
+    edit editor(clk, edit, up, down, left, right, limit, {hours, minutes, seconds, milliseconds}, {EDIThours, EDITminute, EDITsecond, EDITmillisecond}, editing);
+    always @ (posedge kiHz or negedge reset) begin
         if (!reset) begin
             mytime <= 0;
             hours <= 0;
             minutes <= 0;
             seconds <= 0;
             milliseconds <= 0;
-//        end else if (edit) begin
-//            mytime <= {EDIThours, EDITminute, EDITsecond, EDITmillisecond};
-//        end else begin
-//            mytime <= {hours, minutes, seconds, milliseconds};
-//            end
-        end else if(edit) begin
-            mytime <= {hours, minutes, seconds, milliseconds};
-            end
-    end
-    always @ (posedge kiHz) begin
-       if (edit) {hours, minutes, seconds, milliseconds} <= {EDIThours, EDITminute, EDITsecond, EDITmillisecond};
-       if (!edit && {hours, minutes, seconds, milliseconds} != 0) begin
+        end else begin
+        mytime = {hours, minutes, seconds, milliseconds};
+        if (edit) begin
+            {hours, minutes, seconds, milliseconds} <= {EDIThours, EDITminute, EDITsecond, EDITmillisecond};
+        end else if ({hours, minutes, seconds, milliseconds} != 0) begin
             milliseconds <= milliseconds - 1;
             if (milliseconds == 0) begin
                 milliseconds <= 999;
                 seconds <= seconds - 1;
-            if (seconds == 0) begin
-                seconds <= 59;
-                minutes <= minutes - 1;
-            if (minutes == 0) begin
-                minutes <= 59;
-                hours <= hours - 1;
-            end 
+                if (seconds == 0) begin
+                    seconds <= 59;
+                    minutes <= minutes - 1;
+                    if (minutes == 0) begin
+                        minutes <= 59;
+                        hours <= hours - 1;
+                    end 
+                end
             end
-            end
+        end
         end
     end
 endmodule
