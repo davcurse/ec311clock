@@ -27,15 +27,26 @@
 // outputs 12 and 24 hour clock times
 // output am and pm
 
-module internal_clock(clk, edit_sw, reset, up, down, left, right, clock12, clock24, editing);
-
-input clk, edit_sw, reset, up, down, left, right;
-output reg [28:0] clock12, clock24;
-output reg [1:0] editing;
+module internal_clock(
+input clk, 
+input edit_sw, 
+input reset, 
+input up,
+input down, 
+input left, 
+input right, 
+output reg[28:0] clock12, clock24, 
+output wire [1:0] editing
+);
 
 reg [9:0] millisecond;
 reg [5:0] minute, second;
 reg [6:0] hour12, hour24; 
+
+wire [9:0] EDITmillisecond;
+wire [5:0] EDITminute, EDITsecond;
+wire [6:0] EDIThour12, EDIThour24; 
+
 
 //reg[9:0] millisecond;
 //reg [5:0] minute, second;
@@ -43,7 +54,7 @@ reg [6:0] hour12, hour24;
 wire khz_clock;
 
 // Instantiate the edit jit
-edit edit1(.clk(clk), .en(edit_sw), .up(up), .down(down), .left(left), .left(left), .right(right), .time_in({hour24, minute, second, millisecond}), .time_out({hour24, minute, second, millisecond}), .editing(editing));
+edit edit1(.clk(clk), .en(edit_sw), .up(up), .down(down), .left(left), .right(right), .time_in({hour24, minute, second, millisecond}), .time_out({EDIThour24, EDITminute, EDITsecond, EDITmillisecond}), .editing(editing));
 
 // Instantiate that jit
 clock_divider clock1(.clock(clk), .reset(reset), .khz_out(khz_clock));
@@ -57,6 +68,10 @@ always @ (posedge khz_clock or negedge reset) begin
         millisecond <= 0;
         clock12 <= 0;
         clock24 <= 0;
+    end else if (edit_sw) begin
+        {hour24, minute, second, millisecond} <= {EDIThour24, EDITminute, EDITsecond, EDITmillisecond};
+        clock24 = {hour24, minute, second, millisecond};
+        clock12 = {hour12, minute, second, millisecond};    
     end else begin
         millisecond <= millisecond + 1'b1;
         if(millisecond == 10'b1111100111) begin
@@ -70,7 +85,18 @@ always @ (posedge khz_clock or negedge reset) begin
                     hour24 <= hour24 + 1'b1;
                     hour12 <= hour12 + 1'b1;
                     
-                    if(hour24 == 5'b11000) begin // This is for the 24 hour clock
+//                    if(hour24 > 23) begin // This is for the 24 hour clock
+//                        hour24 <= 5'b00000;
+//                    end
+//                    if(hour24 % 12 == 0) begin // This is for the 12 hour clock when 24 hour clock is at 12
+//                        hour12 <= (hour24 % 12) + 5'b01100;
+//                    end else begin
+//                        hour12 <= hour24 % 12;
+//                    end
+                end
+            end
+        end
+                    if(hour24 > 23) begin // This is for the 24 hour clock
                         hour24 <= 5'b00000;
                     end
                     if(hour24 % 12 == 0) begin // This is for the 12 hour clock when 24 hour clock is at 12
@@ -78,18 +104,8 @@ always @ (posedge khz_clock or negedge reset) begin
                     end else begin
                         hour12 <= hour24 % 12;
                     end
-                end
-            end
-        end
-
-
-
-        
-
-        
         clock24 = {hour24, minute, second, millisecond};
-        clock12 = {hour12, minute, second, millisecond};
-        
+        clock12 = {hour12, minute, second, millisecond};  
     end
         
 

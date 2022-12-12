@@ -35,7 +35,7 @@ module stopwatch(
         end
     end //always
     
-    always @ (posedge khz_clock or negedge resetn) begin
+    always @ (posedge khz_clock) begin
         if (mode) begin
             ms <= ms + 1;
             if (ms == 999) begin

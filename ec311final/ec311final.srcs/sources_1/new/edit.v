@@ -46,20 +46,20 @@ module edit(
                 case (editing)
                     2'b00: begin
                         time_out[28:22] <= time_out[28:22] + 1;
-                        if (time_out[28:22] == 2'd99) begin
-                            time_out[28:22] = 0;
+                        if (time_out[28:22] == 99) begin
+                            time_out[28:22] <= 0;
                         end
                     end
                     2'b01: begin
                         time_out[21:16] <= time_out[21:16] + 1;
-                        if (time_out[21:16] == 2'd59) begin
-                            time_out[21:16] = 0;
+                        if (time_out[21:16] == 59) begin
+                            time_out[21:16] <= 0;
                         end
                     end
                     2'b10: begin
                         time_out[15:10] <= time_out[15:10] + 1;
-                        if (time_out[15:10] == 2'd59) begin
-                            time_out[15:10] = 0;
+                        if (time_out[15:10] == 59) begin
+                            time_out[15:10] <= 0;
                         end
                     end
                 endcase
@@ -68,20 +68,20 @@ module edit(
                 case (editing)
                     2'b00: begin
                         time_out[28:22] <= time_out[28:22] - 1;
-                        if (time_out[28:22] == 2'd00) begin
-                            time_out[28:22] = 2'd99;
+                        if (time_out[28:22] == 0) begin
+                            time_out[28:22] <= 99;
                         end
                     end
                     2'b01: begin
                         time_out[21:16] <= time_out[21:16] - 1;
-                        if (time_out[21:16] == 2'd00) begin
-                            time_out[21:16] = 2'd59;
+                        if (time_out[21:16] == 0) begin
+                            time_out[21:16] <= 59;
                         end
                     end
                     2'b10: begin
                         time_out[15:10] <= time_out[15:10] - 1;
-                        if (time_out[15:10] == 2'd00) begin
-                            time_out[15:10] = 2'd59;
+                        if (time_out[15:10] == 0) begin
+                            time_out[15:10] <= 59;
                         end
                     end
                 endcase

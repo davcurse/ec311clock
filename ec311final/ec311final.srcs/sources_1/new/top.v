@@ -35,6 +35,8 @@ module top(
     output wire [3:0] VGA_R,    // 4-bit VGA red output
     output wire [3:0] VGA_G,    // 4-bit VGA green output
     output wire [3:0] VGA_B     // 4-bit VGA blue output
+//    output wire [28:0] out_twelve,
+//    output wire [28:0] out_twentyfour
     );
     wire kHz_out;
     wire UP_db;
@@ -45,12 +47,13 @@ module top(
     reg internal_RST;
     reg timer_RST;
     reg stopwatch_RST;
-    reg [28:0] out_twelve;
-    reg [28:0] out_twentyfour;
-    reg [28:0] out_timer;
-    reg [28:0] out_stopwatch;
+    wire [28:0] out_twelve;
+    wire [28:0] out_twentyfour;
+    wire [28:0] out_timer;
+    wire [28:0] out_stopwatch;
+    wire [1:0] EDITING;
     reg [28:0] myTime;
-    reg [62:0] SEGMENTS;
+    wire [62:0] SEGMENTS;
     clock_divider kHZ(CLK, RST_BTN, kHz_out);
     debouncer UPdb(CLK, RST_BTN, UP, UP_db);
     debouncer DOWNdb(CLK, RST_BTN, DOWN, DOWN_db);
@@ -62,10 +65,13 @@ module top(
         timer_RST = (SELECT == 2'b10) ? RST_BTN : 1'b1;
         stopwatch_RST = (SELECT == 2'b11) ? RST_BTN : 1'b1;
     end
-    internal_clock internal(CLK, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, internal_RST, out_twelve, out_twentyfour);
-    timer timer(CLK, timer_RST, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, out_timer, );
-    stopwatch stopwatch(CLK, stopwatch_RST, TOGGLE_db, out_stopwatch);
-    always @ (*) begin
+//    internal_clock internal(CLK, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, internal_RST, out_twelve, out_twentyfour);
+//    timer timer(CLK, timer_RST, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, out_timer, );
+//    stopwatch stopwatch(CLK, stopwatch_RST, TOGGLE_db, out_stopwatch);
+    internal_clock internal(CLK, EDIT, RST_BTN, UP_db, DOWN_db, LEFT_db, RIGHT_db, out_twelve, out_twentyfour, EDITING);
+    timer timer(CLK, RST_BTN, EDIT, UP_db, DOWN_db, LEFT_db, RIGHT_db, out_timer, EDITING);
+    stopwatch stopwatch(CLK, RST_BTN, TOGGLE_db, out_stopwatch);
+        always @ (*) begin
         case (SELECT)
             2'b00: myTime = out_twelve;
             2'b01: myTime = out_twentyfour;
